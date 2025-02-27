@@ -1,0 +1,156 @@
+import java.util.*;
+
+abstract class Restaurant {
+    protected String nume = null;
+    protected String type = null;
+    protected Menu menu;
+    protected String chef = null;
+    public Restaurant(String nume, String type, String chef) {
+        this.nume = nume;
+        this.type = type;
+        this.menu = new Menu();
+        this.chef = chef;
+    }
+
+    public void addProdus(String name, double price, String descriere) {
+        menu.addProdus(new Produs(name, price, descriere));
+    }
+
+    public void displayDetails() {
+        System.out.println("Restaurant: " + this.nume);
+        System.out.println("Tip: " + this.type);
+        System.out.println("Chef: " + this.chef);
+        System.out.println("Meniu:");
+        this.menu.displayMenu();
+    }
+    public abstract double calculeazaComanda(Object... produseSiCantitati);
+}
+
+class RestaurantVegetarian extends Restaurant {
+    private static double discount = 0.1;
+    public RestaurantVegetarian(String nume, String chef) {
+       super(nume, "Vegetarian",chef );
+    }
+    @Override
+    public double calculeazaComanda(Object... produseSiCantitati) {
+        double total = 0;
+        for (int i = 0; i < produseSiCantitati.length; i += 2) {
+            String produs = (String) produseSiCantitati[i];
+            int cantitate = (int) produseSiCantitati[i + 1];
+            Produs p = menu.getProdus(produs);
+            if (p != null) {
+                total += p.getPrice() * cantitate;
+            }
+        }
+        return total * (1 - discount);
+    }
+
+}
+
+class RestaurantNonVegetarian extends Restaurant {
+    private static double taxa_livrare = 5.0;
+    public RestaurantNonVegetarian(String nume, String chef) {
+        super(nume, "NonVegetarian",chef );
+    }
+    @Override
+    public double calculeazaComanda(Object... produseSiCantitati) {
+        double total = 0;
+        for (int i = 0; i < produseSiCantitati.length; i += 2) {
+            String produs = (String) produseSiCantitati[i];
+            int cantitate = (int) produseSiCantitati[i + 1];
+            Produs p = menu.getProdus(produs);
+            if (p != null) {
+                total += p.getPrice() * cantitate;
+            }
+        }
+        return total + taxa_livrare; 
+    }
+
+}
+
+class Produs {
+    private String name;
+    private double price;
+    private String descriere;
+
+    public Produs(String name, Double price, String descriere) {
+        this.name = name;
+        this.price = price;
+        this.descriere = descriere;
+    }
+
+    public Double GetPrice() {
+        return this.price;
+    }
+    public String GetName() {
+        return this.name;
+    }
+
+    public double getPrice() {
+        return this.price;
+    }
+}
+
+class Menu {
+    private List<Produs> produse;
+
+    public Menu() {
+        this.produse = new ArrayList<>();
+    }
+
+    public void addProdus(Produs produs) {
+        produse.add(produs);
+    }
+
+    public Produs getProdus(String name) {
+        for (Produs p : produse) {
+            if (p.toString().contains(name)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public void displayMenu() {
+        for (Produs produs : produse) {
+            System.out.println("- " + produs);
+        }
+    }
+
+}
+public class Main {
+    public static void main(String[] args) {
+        Restaurant veg1 = new RestaurantVegetarian("Green Leaf", "Chef Ionel");
+        Restaurant veg2 = new RestaurantVegetarian("Healthy Bites", "Chef Maria");
+        Restaurant nonVeg1 = new RestaurantNonVegetarian("Meat Lovers", "Chef George");
+        Restaurant nonVeg2 = new RestaurantNonVegetarian("Grill House", "Chef Vasile");
+
+        veg1.addProdus("Salata de quinoa", 25.0, "Salata sanatoasa cu quinoa, avocado și rosii");
+        veg1.addProdus("Supa de linte", 20.0, "Supa cremoasa de linte rosie");
+
+        veg2.addProdus("Tofu stir-fry", 30.0, "Tofu cu legume trase la tigaie");
+        veg2.addProdus("Burger vegetarian", 28.0, "Burger din ciuperci și naut");
+
+        nonVeg1.addProdus("Burger cu vita", 35.0, "Burger suculent cu carne de vita Angus");
+        nonVeg1.addProdus("Friptura de pui", 40.0, "Piept de pui la gratar cu legume");
+
+        nonVeg2.addProdus("Cotlet de porc", 45.0, "Cotlet suculent cu sos BBQ");
+        nonVeg2.addProdus("Pește la gratar", 50.0, "Pastrav la gratar cu lamaie");
+
+        System.out.println("Detalii restaurant vegetarian");
+        veg1.displayDetails();
+
+        System.out.println("\nDetalii restaurant non-vegetarian");
+        nonVeg1.displayDetails();
+
+        Map<String, Integer> comandaVeg = new HashMap<>();
+        comandaVeg.put("Salata de quinoa", 2);
+        comandaVeg.put("Supa de linte", 1);
+
+        Map<String, Integer> comandaNonVeg = new HashMap<>();
+        comandaNonVeg.put("Burger cu vita", 1);
+        comandaNonVeg.put("Friptura de pui", 2);
+
+
+    }
+}
